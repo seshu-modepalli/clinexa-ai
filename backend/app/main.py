@@ -1,17 +1,20 @@
 from fastapi import FastAPI
+from app.config.settings import get_settings
+
+settings = get_settings()
 
 app = FastAPI(
-    title="Clinexa AI",
+    title=settings.APP_NAME,
     description="AI Powered Healthcare Assistant",
-    version="1.0.0"
+    version=settings.APP_VERSION
 )
 
 
 @app.get("/")
 def root():
     return {
-        "application": "Clinexa AI",
-        "version": "1.0.0",
+        "application": settings.APP_NAME,
+        "version": settings.APP_VERSION,
         "status": "Running"
     }
 
@@ -19,5 +22,6 @@ def root():
 @app.get("/health")
 def health():
     return {
-        "status": "UP"
+        "status": "UP",
+        "debug": settings.DEBUG,
     }
