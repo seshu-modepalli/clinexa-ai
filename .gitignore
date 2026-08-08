@@ -16,4 +16,5 @@ node_modules/
 Thumbs.db
 
 # Logs
+logs/
 *.log
