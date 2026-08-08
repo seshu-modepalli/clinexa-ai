@@ -1,19 +1,51 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+
 from app.config.settings import get_settings
-from app.core.logging_core import logger
 from app.core.exception_handlers import (
     clinexa_exception_handler,
     generic_exception_handler
 )
 from app.core.exceptions import ResourceNotFoundException
+from app.core.logging_core import logger
+from app.database.connection import MongoDB
+
 
 settings = get_settings()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Application startup and shutdown lifecycle.
+    """
+
+    logger.info("Starting Clinexa AI application")
+
+    # Startup
+    MongoDB.connect()
+
+    logger.info("Clinexa AI application started successfully")
+
+    yield
+
+    # Shutdown
+    logger.info("Shutting down Clinexa AI application")
+
+    MongoDB.disconnect()
+
+    logger.info("Clinexa AI application stopped")
+
 
 app = FastAPI(
     title=settings.APP_NAME,
     description="AI Powered Healthcare Assistant",
-    version=settings.APP_VERSION
+    version=settings.APP_VERSION,
+    lifespan=lifespan
 )
+
+
 app.add_exception_handler(
     ResourceNotFoundException,
     clinexa_exception_handler
@@ -23,14 +55,13 @@ app.add_exception_handler(
     Exception,
     generic_exception_handler
 )
-@app.on_event("startup")
-async def startup_event():
-    logger.info("Clinexa AI application started")
-    # Add any startup tasks here, e.g., database connections, etc.
+
 
 @app.get("/")
 def root():
-    logger.info("Root endpoint called.")
+
+    logger.info("Root endpoint requested")
+
     return {
         "application": settings.APP_NAME,
         "version": settings.APP_VERSION,
@@ -40,20 +71,18 @@ def root():
 
 @app.get("/health")
 def health():
-    logger.info("Health check endpoint called.")
+
+    logger.info("Health check requested")
+
+    mongo_status = "UP"
+
+    try:
+        MongoDB.get_database().command("ping")
+    except Exception:
+        mongo_status = "DOWN"
+
     return {
         "status": "UP",
         "debug": settings.DEBUG,
+        "database": mongo_status
     }
-@app.get("/test-error")
-def test_error():
-    raise ResourceNotFoundException(
-        "Test resource was not found"
-    )
-
-
-@app.get("/test-internal-error")
-def test_internal_error():
-    raise RuntimeError(
-        "This is a test internal server error"
-    )
