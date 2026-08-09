@@ -10,7 +10,7 @@ from app.core.exception_handlers import (
 from app.core.exceptions import ResourceNotFoundException
 from app.core.logging_core import logger
 from app.database.connection import MongoDB
-
+from app.api.patients import router as patients_router
 
 settings = get_settings()
 
@@ -45,6 +45,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+app.include_router(patients_router)
 
 app.add_exception_handler(
     ResourceNotFoundException,
