@@ -4,10 +4,15 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.database.dependencies import get_database
-from app.models.patient import Patient
-from app.repositories.patient_repository import PatientRepository
+from app.repositories.patient_repository import (
+    MongoPatientRepository
+)
 from app.schemas.patient import PatientCreate, PatientResponse
-
+from app.services.patient_service import PatientService
+from app.schemas.patient import (
+    PatientCreate,
+    PatientResponse
+)
 
 router = APIRouter(
     prefix="/api/v1/patients",
@@ -15,10 +20,13 @@ router = APIRouter(
 )
 
 
-def get_patient_repository(
-    database=Depends(get_database),
-):
-    return PatientRepository(database)
+def get_patient_service(
+    database=Depends(get_database)
+) -> PatientService:
+
+    repository = MongoPatientRepository(database)
+
+    return PatientService(repository)
 
 
 @router.post(
@@ -28,22 +36,12 @@ def get_patient_repository(
 )
 def create_patient(
     patient_data: PatientCreate,
-    repository: PatientRepository = Depends(
-        get_patient_repository
+    service: PatientService = Depends(
+        get_patient_service
     ),
 ):
 
-    patient = Patient(
-        patient_id=str(uuid4()),
-        name=patient_data.name,
-        age=patient_data.age,
-        gender=patient_data.gender,
-        phone=patient_data.phone,
-        email=patient_data.email,
-        created_at=datetime.now(timezone.utc),
-    )
-
-    return repository.create(patient)
+    return service.create_patient(patient_data)
 
 
 @router.get(
@@ -52,18 +50,12 @@ def create_patient(
 )
 def get_patient(
     patient_id: str,
-    repository: PatientRepository = Depends(
-        get_patient_repository
+    service: PatientService = Depends(
+        get_patient_service
     ),
 ):
 
-    patient = repository.find_by_id(patient_id)
-
-    if patient is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Patient not found"
-        )
+    return service.get_patient(patient_id)
 
     return patient
 
@@ -73,9 +65,9 @@ def get_patient(
     response_model=list[PatientResponse]
 )
 def get_patients(
-    repository: PatientRepository = Depends(
-        get_patient_repository
+    service: PatientService = Depends(
+        get_patient_service
     ),
 ):
 
-    return repository.find_all()
+    return service.get_all_patients()

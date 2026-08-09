@@ -4,9 +4,11 @@ from uuid import uuid4
 from pymongo.database import Database
 
 from app.models.patient import Patient
+from app.repositories.patient_repository_interface import (
+    PatientRepositoryInterface
+)
 
-
-class PatientRepository:
+class MongoPatientRepository(PatientRepositoryInterface):
 
     COLLECTION_NAME = "patients"
 
@@ -16,7 +18,7 @@ class PatientRepository:
     def create(self, patient: Patient) -> Patient:
 
         document = {
-            "patient_id": patient.patient_id,
+            "patient_id": patient.patient_id,   
             "name": patient.name,
             "age": patient.age,
             "gender": patient.gender,
