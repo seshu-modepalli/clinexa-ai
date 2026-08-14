@@ -31,7 +31,7 @@ class ResourceNotFoundException(ClinexaException):
 
 class BadRequestException(ClinexaException):
     """
-    Raised when the client sends an invalid request.
+    Raised when the request is invalid.
     """
 
     def __init__(self, message: str = "Invalid request"):
@@ -39,4 +39,17 @@ class BadRequestException(ClinexaException):
             message=message,
             error_code="BAD_REQUEST",
             status_code=400
+        )
+
+
+class ResourceAlreadyExistsException(ClinexaException):
+    """
+    Raised when a resource already exists.
+    """
+
+    def __init__(self, message: str = "Resource already exists"):
+        super().__init__(
+            message=message,
+            error_code="RESOURCE_ALREADY_EXISTS",
+            status_code=409
         )

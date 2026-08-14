@@ -16,3 +16,14 @@ class PatientRepositoryInterface(ABC):
     @abstractmethod
     def find_all(self) -> list[Patient]:
         pass
+    @abstractmethod
+    def find_all(self) -> list[Patient]:
+        pass
+
+    @abstractmethod
+    def update(self, patient: Patient) -> Patient:
+        pass
+
+    @abstractmethod
+    def delete(self, patient_id: str) -> bool:
+        pass
