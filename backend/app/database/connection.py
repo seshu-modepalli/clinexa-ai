@@ -3,6 +3,7 @@ from pymongo.errors import ConnectionFailure
 
 from app.config.settings import get_settings
 from app.core.logging_core import logger
+from app.database.indexes import create_indexes
 
 
 settings = get_settings()
@@ -35,7 +36,7 @@ class MongoDB:
             cls.database = cls.client[
                 settings.DATABASE_NAME
             ]
-
+            create_indexes(cls.database)
             logger.info(
                 "MongoDB connected successfully | database=%s",
                 settings.DATABASE_NAME
