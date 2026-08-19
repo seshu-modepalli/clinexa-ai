@@ -11,7 +11,7 @@ from app.core.exceptions import ResourceNotFoundException
 from app.core.logging_core import logger
 from app.database.connection import MongoDB
 from app.api.patients import router as patients_router
-
+from app.api.conversations import router as conversation_router
 settings = get_settings()
 
 
@@ -46,7 +46,7 @@ app = FastAPI(
 )
 
 app.include_router(patients_router)
-
+app.include_router(conversation_router)
 app.add_exception_handler(
     ResourceNotFoundException,
     clinexa_exception_handler

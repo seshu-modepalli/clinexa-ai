@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -14,4 +16,4 @@ class MessageResponse(BaseModel):
     conversation_id: str
     role: str
     content: str
-    created_at: str
+    created_at: datetime

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-
+from datetime import datetime
 
 class ConversationCreate(BaseModel):
     patient_id: str = Field(
@@ -18,5 +18,5 @@ class ConversationResponse(BaseModel):
     conversation_id: str
     patient_id: str
     title: str
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
