@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     DATABASE_NAME: str
 
     OLLAMA_URL: str
+    OLLAMA_MODEL: str
 
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
