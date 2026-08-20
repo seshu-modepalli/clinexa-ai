@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from pymongo.database import Database
 
 from app.models.conversation import Conversation
@@ -90,7 +92,16 @@ class MongoConversationRepository(
         }
 
         self.messages.insert_one(document)
-
+        self.conversations.update_one(
+            {
+                "conversation_id": message.conversation_id
+            },
+            {
+                "$set": {
+                    "updated_at": datetime.now(timezone.utc)
+                }
+            }
+        )
         return message
 
     def find_messages_by_conversation(

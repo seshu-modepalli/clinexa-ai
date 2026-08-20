@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Clinexa AI</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                ✚
+            </div>
+
+            <div>
+
+                <div class="brand-name">
+                    Clinexa
+                </div>
+
+                <div class="brand-subtitle">
+                    AI Healthcare Assistant
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <button
+            id="new-chat-btn"
+            class="new-chat-btn"
+        >
+
+            <span>＋</span>
+
+            New conversation
+
+        </button>
+
+
+        <div class="search-box">
+
+            <span>⌕</span>
+
+            <input
+                id="conversation-search"
+                type="text"
+                placeholder="Search conversations"
+            >
+
+        </div>
+
+
+        <div class="sidebar-section">
+
+            <div class="section-title">
+                TODAY
+            </div>
+
+            <div
+                id="today-conversations"
+                class="conversation-list"
+            >
+
+                <div class="conversation-item active">
+                    New conversation
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-section">
+
+            <div class="section-title">
+                PREVIOUS
+            </div>
+
+            <div
+                id="previous-conversations"
+                class="conversation-list"
+            >
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="patient-card">
+
+                <div class="patient-avatar">
+                    P
+                </div>
+
+                <div class="patient-info">
+
+                    <div class="patient-name">
+                        Patient
+                    </div>
+
+                    <div class="patient-status">
+                        ● Connected
+                    </div>
+
+                </div>
+
+                <button class="more-btn">
+                    ⋮
+                </button>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <!-- HEADER -->
+
+        <header class="topbar">
+
+            <div class="mobile-brand">
+
+                <div class="brand-icon">
+                    ✚
+                </div>
+
+                <span>
+                    Clinexa AI
+                </span>
+
+            </div>
+
+
+            <div class="conversation-header">
+
+                <div class="status-dot"></div>
+
+                <div>
+
+                    <div
+                        id="conversation-title"
+                        class="conversation-name"
+                    >
+                        New conversation
+                    </div>
+
+                    <div class="online-status">
+                        AI assistant online
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <button
+                    class="icon-btn"
+                    title="Notifications"
+                >
+                    ♧
+                </button>
+
+                <button
+                    class="icon-btn"
+                    title="Settings"
+                >
+                    ⚙
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- CHAT -->
+
+        <section
+            id="chat-area"
+            class="chat-area"
+        >
+
+            <div
+                id="welcome-screen"
+                class="welcome-screen"
+            >
+
+                <div class="welcome-logo">
+                    ✚
+                </div>
+
+                <h1>
+                    How can I help you today?
+                </h1>
+
+                <p>
+                    I'm Clinexa, your AI healthcare assistant.
+                </p>
+
+
+                <div class="suggestions">
+
+
+                    <button
+                        class="suggestion-card"
+                        data-message="I have a headache. What could be the possible causes?"
+                    >
+
+                        <span class="suggestion-icon">
+                            🤕
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Headache
+                            </strong>
+
+                            <small>
+                                Understand possible causes
+                            </small>
+
+                        </div>
+
+                    </button>
+
+
+                    <button
+                        class="suggestion-card"
+                        data-message="I have a fever. What should I do?"
+                    >
+
+                        <span class="suggestion-icon">
+                            🌡️
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Fever
+                            </strong>
+
+                            <small>
+                                Get general guidance
+                            </small>
+
+                        </div>
+
+                    </button>
+
+
+                    <button
+                        class="suggestion-card"
+                        data-message="What are some healthy lifestyle habits?"
+                    >
+
+                        <span class="suggestion-icon">
+                            ❤️
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Healthy habits
+                            </strong>
+
+                            <small>
+                                Improve your daily routine
+                            </small>
+
+                        </div>
+
+                    </button>
+
+
+                    <button
+                        class="suggestion-card"
+                        data-message="When should I see a doctor?"
+                    >
+
+                        <span class="suggestion-icon">
+                            🩺
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                See a doctor
+                            </strong>
+
+                            <small>
+                                Understand warning signs
+                            </small>
+
+                        </div>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="messages"
+                class="messages"
+            >
+            </div>
+
+        </section>
+
+
+        <!-- MESSAGE COMPOSER -->
+
+        <footer class="composer-container">
+
+            <div class="composer">
+
+                <button
+                    class="attach-btn"
+                    title="Attach file"
+                >
+                    ＋
+                </button>
+
+
+                <textarea
+                    id="message-input"
+                    rows="1"
+                    placeholder="Ask Clinexa anything..."
+                ></textarea>
+
+
+                <button
+                    id="send-btn"
+                    class="send-btn"
+                    title="Send message"
+                >
+                    ↑
+                </button>
+
+            </div>
+
+
+            <div class="composer-footer">
+
+                <span>
+                    Clinexa AI may make mistakes.
+                    Verify important medical information.
+                </span>
+
+                <span>
+                    Not a substitute for professional medical advice.
+                </span>
+
+            </div>
+
+        </footer>
+
+    </main>
+
+</div>
+
+
+<script src="js/app.js"></script>
+
+</body>
+
+</html>
