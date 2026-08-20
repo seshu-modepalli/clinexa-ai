@@ -85,23 +85,29 @@ async function sendMessage() {
         return;
     }
 
+    // Add user message
     addMessage("user", message);
 
+    // Clear input
     messageInput.value = "";
 
-    showTyping();
-
+    // Disable send button
     sendButton.disabled = true;
+
+    // Show typing indicator
+    showTyping();
 
     try {
 
         const response = await fetch(
-            "http://127.0.0.1:8000/api/v1/chat",
+            "http://127.0.0.1:8000/api/v1/chat/stream",
             {
                 method: "POST",
+
                 headers: {
                     "Content-Type": "application/json"
                 },
+
                 body: JSON.stringify({
                     message: message
                 })
@@ -114,20 +120,70 @@ async function sendMessage() {
             );
         }
 
-        const data = await response.json();
+        if (!response.body) {
+            throw new Error(
+                "Streaming is not supported by this browser."
+            );
+        }
 
         hideTyping();
 
-        addMessage(
-            "assistant",
-            data.response
-        );
+        /*
+         * IMPORTANT:
+         * Create a NEW assistant message for
+         * every user question.
+         */
+        const assistantBubble =
+            addMessage(
+                "assistant",
+                ""
+            );
+
+        const reader =
+            response.body.getReader();
+
+        const decoder =
+            new TextDecoder();
+
+        let assistantMessage = "";
+
+        while (true) {
+
+            const { value, done } =
+                await reader.read();
+
+            if (done) {
+                break;
+            }
+
+            const chunk =
+                decoder.decode(
+                    value,
+                    {
+                        stream: true
+                    }
+                );
+
+            assistantMessage += chunk;
+
+            /*
+             * Update ONLY the assistant bubble
+             * belonging to this question.
+             */
+            assistantBubble.textContent =
+                assistantMessage;
+
+            scrollToBottom();
+        }
 
     } catch (error) {
 
         hideTyping();
 
-        console.error("Chat error:", error);
+        console.error(
+            "Chat streaming error:",
+            error
+        );
 
         addMessage(
             "assistant",
@@ -139,8 +195,15 @@ async function sendMessage() {
         sendButton.disabled = false;
 
         messageInput.focus();
+
     }
 }
+let currentAssistantMessage = null;
+
+
+/* ================================= */
+/* ADD MESSAGE */
+/* ================================= */
 
 /* ================================= */
 /* ADD MESSAGE */
@@ -244,6 +307,11 @@ function addMessage(
 
     scrollToBottom();
 
+
+    // IMPORTANT:
+    // Return the bubble so streaming
+    // can update its content.
+    return bubble;
 }
 
 

@@ -1,4 +1,5 @@
 import httpx
+import json
 
 from app.config import settings
 
@@ -67,3 +68,50 @@ Clinexa AI response:
             data = response.json()
 
             return data.get("response", "").strip()
+
+    async def chat_stream(self, message: str):
+
+        url = f"{settings.OLLAMA_URL}/api/generate"
+
+        prompt = f"""
+    {self.SYSTEM_PROMPT}
+
+    User message:
+
+    {message}
+
+    Clinexa AI response:
+    """
+
+        payload = {
+            "model": settings.OLLAMA_MODEL,
+            "prompt": prompt,
+            "stream": True
+        }
+
+        async with httpx.AsyncClient(timeout=None) as client:
+
+            async with client.stream(
+                "POST",
+                url,
+                json=payload
+            ) as response:
+
+                response.raise_for_status()
+
+                async for line in response.aiter_lines():
+
+                    if not line:
+                        continue
+
+                    try:
+
+                        data = json.loads(line)
+
+                        yield data.get("response", "")
+
+                        if data.get("done", False):
+                            break
+
+                    except json.JSONDecodeError:
+                        continue
