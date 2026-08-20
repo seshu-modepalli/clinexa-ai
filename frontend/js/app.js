@@ -77,64 +77,70 @@ messageInput.addEventListener(
 );
 
 
-function sendMessage() {
+async function sendMessage() {
 
-    const message =
-        messageInput.value.trim();
-
+    const message = messageInput.value.trim();
 
     if (!message) {
-
         return;
-
     }
 
-
-    addMessage(
-        "user",
-        message
-    );
-
+    addMessage("user", message);
 
     messageInput.value = "";
 
-
     showTyping();
-
 
     sendButton.disabled = true;
 
+    try {
 
-    /*
-     * Temporary response.
-     *
-     * In the next AI commit this will
-     * be replaced by the Ollama/Llama
-     * response from the FastAPI backend.
-     */
+        const response = await fetch(
+            "http://127.0.0.1:8000/api/v1/chat",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: message
+                })
+            }
+        );
 
-    setTimeout(
-        () => {
-
-            hideTyping();
-
-
-            addMessage(
-                "assistant",
-                "I received your message. Clinexa AI is being prepared to provide an intelligent healthcare response."
+        if (!response.ok) {
+            throw new Error(
+                `HTTP error: ${response.status}`
             );
+        }
 
+        const data = await response.json();
 
-            sendButton.disabled = false;
+        hideTyping();
 
-            messageInput.focus();
+        addMessage(
+            "assistant",
+            data.response
+        );
 
-        },
-        1200
-    );
+    } catch (error) {
 
+        hideTyping();
+
+        console.error("Chat error:", error);
+
+        addMessage(
+            "assistant",
+            "Sorry, I couldn't connect to Clinexa AI. Please try again."
+        );
+
+    } finally {
+
+        sendButton.disabled = false;
+
+        messageInput.focus();
+    }
 }
-
 
 /* ================================= */
 /* ADD MESSAGE */
