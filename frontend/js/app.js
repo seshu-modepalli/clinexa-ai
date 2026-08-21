@@ -27,7 +27,7 @@ const conversationTitle =
     document.getElementById(
         "conversation-title"
     );
-
+let chatSocket = null;
 
 /* ================================= */
 /* NEW CHAT */
@@ -79,124 +79,63 @@ messageInput.addEventListener(
 
 async function sendMessage() {
 
-    const message = messageInput.value.trim();
+    const message =
+        messageInput.value.trim();
 
     if (!message) {
         return;
     }
 
+
     // Add user message
-    addMessage("user", message);
+    addMessage(
+        "user",
+        message
+    );
+
+
+    // Reset assistant message
+    currentAssistantMessage = null;
+
 
     // Clear input
     messageInput.value = "";
 
-    // Disable send button
+
+    // Disable button
     sendButton.disabled = true;
+
 
     // Show typing indicator
     showTyping();
 
-    try {
 
-        const response = await fetch(
-            "http://127.0.0.1:8000/api/v1/chat/stream",
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    message: message
-                })
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(
-                `HTTP error: ${response.status}`
-            );
-        }
-
-        if (!response.body) {
-            throw new Error(
-                "Streaming is not supported by this browser."
-            );
-        }
+    if (
+        !chatSocket ||
+        chatSocket.readyState !== WebSocket.OPEN
+    ) {
 
         hideTyping();
-
-        /*
-         * IMPORTANT:
-         * Create a NEW assistant message for
-         * every user question.
-         */
-        const assistantBubble =
-            addMessage(
-                "assistant",
-                ""
-            );
-
-        const reader =
-            response.body.getReader();
-
-        const decoder =
-            new TextDecoder();
-
-        let assistantMessage = "";
-
-        while (true) {
-
-            const { value, done } =
-                await reader.read();
-
-            if (done) {
-                break;
-            }
-
-            const chunk =
-                decoder.decode(
-                    value,
-                    {
-                        stream: true
-                    }
-                );
-
-            assistantMessage += chunk;
-
-            /*
-             * Update ONLY the assistant bubble
-             * belonging to this question.
-             */
-            assistantBubble.textContent =
-                assistantMessage;
-
-            scrollToBottom();
-        }
-
-    } catch (error) {
-
-        hideTyping();
-
-        console.error(
-            "Chat streaming error:",
-            error
-        );
 
         addMessage(
             "assistant",
-            "Sorry, I couldn't connect to Clinexa AI. Please try again."
+            "Unable to connect to Clinexa AI."
         );
-
-    } finally {
 
         sendButton.disabled = false;
 
-        messageInput.focus();
-
+        return;
     }
+
+
+    hideTyping();
+
+
+    // Send message through WebSocket
+    chatSocket.send(
+        message
+    );
+
 }
 let currentAssistantMessage = null;
 
@@ -506,3 +445,75 @@ searchInput.addEventListener(
 
     }
 );
+function connectWebSocket() {
+
+    chatSocket =
+        new WebSocket(
+            "ws://127.0.0.1:8000/api/v1/chat/ws/chat"
+        );
+
+
+    chatSocket.onopen = function() {
+
+        console.log(
+            "Clinexa WebSocket connected"
+        );
+
+    };
+
+
+    chatSocket.onmessage = function(event) {
+
+        const chunk =
+            event.data;
+
+        if (chunk === "[DONE]") {
+
+            sendButton.disabled = false;
+
+            messageInput.focus();
+
+            return;
+        }
+
+
+        if (!currentAssistantMessage) {
+
+            currentAssistantMessage =
+                addMessage(
+                    "assistant",
+                    ""
+                );
+
+        }
+
+
+        currentAssistantMessage.textContent +=
+            chunk;
+
+
+        scrollToBottom();
+
+    };
+
+
+    chatSocket.onerror = function(error) {
+
+        console.error(
+            "WebSocket error:",
+            error
+        );
+
+    };
+
+
+    chatSocket.onclose = function() {
+
+        console.log(
+            "Clinexa WebSocket disconnected"
+        );
+
+    };
+
+}
+connectWebSocket();

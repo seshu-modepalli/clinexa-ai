@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.services.chat_service import ChatService
@@ -48,3 +48,34 @@ async def stream_chat(request: ChatRequest):
         generate(),
         media_type="text/plain"
     )
+@router.websocket("/ws/chat")
+async def websocket_chat(websocket: WebSocket):
+
+    await websocket.accept()
+
+    try:
+
+        while True:
+
+            message = await websocket.receive_text()
+
+            if not message.strip():
+                continue
+
+            response = ""
+
+            async for chunk in chat_service.chat_stream(
+                message
+            ):
+
+                response += chunk
+
+                await websocket.send_text(chunk)
+
+            await websocket.send_text(
+                "[DONE]"
+            )
+
+    except WebSocketDisconnect:
+
+        print("WebSocket client disconnected")
