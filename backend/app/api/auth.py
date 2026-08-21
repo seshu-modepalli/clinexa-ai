@@ -9,7 +9,7 @@ from app.schemas.auth import (
     TokenResponse
 )
 from app.services.auth_service import AuthService
-from app.services.mock_otp_provider import MockOTPProvider
+from app.services.otp_provider_factory import get_otp_provider
 from app.repositories.otp_repository import MongoOTPRepository
 
 router = APIRouter(
@@ -26,7 +26,7 @@ def get_auth_service(
 
     otp_repository = MongoOTPRepository(database)
 
-    otp_provider = MockOTPProvider()
+    otp_provider = get_otp_provider()
 
     return AuthService(
         user_repository=user_repository,

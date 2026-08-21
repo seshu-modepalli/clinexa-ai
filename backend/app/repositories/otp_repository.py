@@ -63,3 +63,19 @@ class MongoOTPRepository(OTPRepositoryInterface):
                 "phone_number": phone_number
             }
         )
+    def update_attempts(
+        self,
+        phone_number: str,
+        attempts: int
+        ) -> None:
+
+        self.collection.update_one(
+        {
+            "phone_number": phone_number
+        },
+        {
+            "$set": {
+                "attempts": attempts
+            }
+        }
+    )

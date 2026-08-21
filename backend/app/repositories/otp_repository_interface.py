@@ -22,3 +22,10 @@ class OTPRepositoryInterface(ABC):
         phone_number: str
     ) -> None:
         pass
+    @abstractmethod
+    def update_attempts(
+        self,
+        phone_number: str,
+        attempts: int
+    ) -> None:
+        pass

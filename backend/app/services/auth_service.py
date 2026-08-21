@@ -17,12 +17,10 @@ from app.repositories.user_repository_interface import (
     UserRepositoryInterface
 )
 from app.services.otp_provider import OTPProvider
+from app.config import settings
 
 
 class AuthService:
-
-    OTP_EXPIRY_MINUTES = 5
-    MAX_ATTEMPTS = 5
 
     def __init__(
         self,
@@ -46,7 +44,7 @@ class AuthService:
         expires_at = (
             datetime.now(timezone.utc)
             + timedelta(
-                minutes=self.OTP_EXPIRY_MINUTES
+                minutes=settings.OTP_EXPIRY_MINUTES
             )
         )
 
@@ -111,7 +109,7 @@ class AuthService:
                 detail="OTP has expired"
             )
 
-        if otp_record.attempts >= self.MAX_ATTEMPTS:
+        if otp_record.attempts >= settings.OTP_MAX_ATTEMPTS:
 
             self.otp_repository.delete_by_phone(
                 phone_number
@@ -130,9 +128,13 @@ class AuthService:
         if not valid:
 
             otp_record.attempts += 1
+            self.otp_repository.update_attempts(
+            phone_number,
+            otp_record.attempts
+        )
 
             # Remove the OTP after max attempts
-            if otp_record.attempts >= self.MAX_ATTEMPTS:
+            if otp_record.attempts >= settings.OTP_MAX_ATTEMPTS:
 
                 self.otp_repository.delete_by_phone(
                     phone_number
