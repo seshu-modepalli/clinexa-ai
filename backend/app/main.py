@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.api.auth import router as auth_router
 from app.config.settings import get_settings
 from app.core.exception_handlers import (
     clinexa_exception_handler,
@@ -56,7 +56,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.include_router(auth_router)
 app.include_router(patients_router)
 app.include_router(conversation_router)
 app.include_router(chat_router)
