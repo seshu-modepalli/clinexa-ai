@@ -1,18 +1,19 @@
 from datetime import datetime, timedelta, timezone
+import hashlib
+import hmac
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
-
-bearer_scheme = HTTPBearer()
-
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBearer
+)
 from jose import JWTError, jwt
 
 from app.config import settings
 
-import hashlib
-import hmac
 
-from app.config import settings
+bearer_scheme = HTTPBearer()
+
 
 def create_access_token(
     user_id: str,
@@ -49,14 +50,15 @@ def decode_access_token(token: str) -> dict:
         )
 
     except JWTError:
-        raise ValueError("Invalid or expired token")
-
-
-bearer_scheme = HTTPBearer()
+        raise ValueError(
+            "Invalid or expired token"
+        )
 
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)
+    credentials: HTTPAuthorizationCredentials = Depends(
+        bearer_scheme
+    )
 ) -> dict:
 
     token = credentials.credentials
@@ -65,14 +67,12 @@ def get_current_user(
         payload = decode_access_token(token)
 
         user_id = payload.get("sub")
-        role = payload.get("role")
 
-        if not user_id or not role:
+        if not user_id:
             raise ValueError("Invalid token")
 
         return {
-            "user_id": user_id,
-            "role": role
+            "user_id": user_id
         }
 
     except ValueError:
@@ -84,6 +84,8 @@ def get_current_user(
                 "WWW-Authenticate": "Bearer"
             }
         )
+
+
 def hash_otp(otp: str) -> str:
 
     return hmac.new(
