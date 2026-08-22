@@ -7,8 +7,6 @@ from app.core.security import (
     hash_otp,
     verify_otp_hash
 )
-from app.models.role import UserRole
-from app.models.user import User
 from app.models.otp import OTP
 from app.repositories.otp_repository_interface import (
     OTPRepositoryInterface
@@ -71,10 +69,10 @@ class AuthService:
         )
 
     async def verify_otp(
-        self,
-        phone_number: str,
-        otp: str
-    ) -> str:
+    self,
+    phone_number: str,
+    otp: str
+) -> dict:
 
         otp_record = (
             self.otp_repository.find_latest_by_phone(
@@ -151,20 +149,22 @@ class AuthService:
         )
 
         user = self.user_repository.find_by_phone(
-            phone_number
-        )
-
+    phone_number
+)
         if user is None:
 
-            user = User(
-                phone_number=phone_number,
-                role=UserRole.PATIENT,
-                is_verified=True
-            )
+            return {
+                "is_registered": False,
+                "registration_required": True,
+                "phone_number": phone_number
+            }
 
-            user = self.user_repository.save(user)
-
-        return create_access_token(
-            user_id=user.id,
-            role=user.role.value
-        )
+        return {
+            "is_registered": True,
+            "registration_required": False,
+            "access_token": create_access_token(
+                user_id=user.id,
+                role=user.role.value
+            ),
+            "token_type": "bearer"
+        }
